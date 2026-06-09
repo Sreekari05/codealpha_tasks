@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Portfolio Dashboard</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+```
+<div class="logo">
+    <i class="fa-solid fa-chart-line"></i>
+    <span>Portfolio</span>
+</div>
+<li>
+    <a href="/logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        Logout
+    </a>
+</li>
+
+<ul>
+    <li class="active">
+        <a href="#"><i class="fa-solid fa-house"></i> Dashboard</a>
+    </li>
+
+    <li>
+        <a href="#"><i class="fa-solid fa-briefcase"></i> Holdings</a>
+    </li>
+
+    <li>
+        <a href="#"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+    </li>
+
+    <li>
+        <a href="#"><i class="fa-solid fa-file"></i> Reports</a>
+    </li>
+</ul>
+```
+
+</div>
+
+<div class="main-content">
+
+```
+<div class="header">
+    <h1>📈 Stock Portfolio Dashboard</h1>
+</div>
+
+<div class="cards">
+
+    <div class="card">
+        <h3>Total Investment</h3>
+        <h2>₹{{ total_investment }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Current Value</h3>
+        <h2>₹{{ current_value }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Profit / Loss</h3>
+        <h2>₹{{ profit }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Total Stocks</h3>
+        <h2>{{ stocks|length }}</h2>
+    </div>
+
+</div>
+
+<div class="add-stock">
+
+    <h2>Add Stock</h2>
+
+    <form method="POST" action="/add">
+
+        <input type="text" name="name" placeholder="Stock Symbol" required>
+
+        <input type="number" name="qty" placeholder="Quantity" required>
+
+        <input type="number" step="0.01" name="buy_price" placeholder="Buy Price" required>
+
+        <input type="number" step="0.01" name="current_price" placeholder="Current Price" required>
+
+        <button type="submit">
+            Add Stock
+        </button>
+
+    </form>
+
+</div>
+
+<div class="charts">
+
+    <div class="chart-box">
+        <h3>Portfolio Growth</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+
+    <div class="chart-box">
+        <h3>Profit Distribution</h3>
+        <canvas id="barChart"></canvas>
+    </div>
+
+</div>
+    <input type="text" id="searchInput" placeholder="Search Stock..." onkeyup="searchStock()">
+<div class="table-section">
+
+    <h2>Portfolio Holdings</h2>
+
+    <table>
+
+        <thead>
+
+            <tr>
+                <th>Stock</th>
+                <th>Qty</th>
+                <th>Buy Price</th>
+                <th>Current Price</th>
+                <th>Profit</th>
+                <th>Action</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for stock in stocks %}
+
+            <tr>
+
+                <td>{{ stock.name }}</td>
+
+                <td>{{ stock.qty }}</td>
+
+                <td>₹{{ stock.buy_price }}</td>
+
+                <td>₹{{ stock.current_price }}</td>
+
+                <td class="{% if stock.profit >= 0 %}profit{% else %}loss{% endif %}">₹{{ stock.profit }}
+</td>
+
+                <td>
+                    <a class="delete-btn"
+                       href="/delete/{{ stock.id }}">
+                       Delete
+                    </a>
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+```
+
+</div>
+
+<script>
+
+const lineCtx = document.getElementById('lineChart');
+
+new Chart(lineCtx,{
+    type:'line',
+    data:{
+        labels:['Jan','Feb','Mar','Apr','May','Jun'],
+        datasets:[{
+            label:'Portfolio Value',
+            data:[10000,18000,25000,32000,45000,58000],
+            tension:0.4
+        }]
+    }
+});
+
+const barCtx = document.getElementById('barChart');
+
+new Chart(barCtx,{
+    type:'bar',
+    data:{
+        labels:['AAPL','TSLA','NVDA','MSFT'],
+        datasets:[{
+            label:'Profit',
+            data:[200,150,400,250]
+        }]
+    }
+});
+
+</script>
+<script>
+function searchStock() {
+    let input = document.getElementById("searchInput").value.toUpperCase();
+    let table = document.querySelector("table");
+    let tr = table.getElementsByTagName("tr");
+
+    for(let i=1;i<tr.length;i++){
+        let td = tr[i].getElementsByTagName("td")[0];
+        if(td){
+            let txt = td.textContent || td.innerText;
+            tr[i].style.display =
+                txt.toUpperCase().includes(input) ? "" : "none";
+        }
+    }
+}
+</script>
+
+</body>
+</html>
